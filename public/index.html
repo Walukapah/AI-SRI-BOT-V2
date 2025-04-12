@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Bot Pairing</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .container { margin-top: 50px; }
+        input, button { padding: 10px; margin: 10px 0; width: 100%; }
+        #codeDisplay { font-size: 24px; font-weight: bold; text-align: center; margin: 20px 0; }
+        #status { color: green; font-weight: bold; }
+        .instructions { background: #f5f5f5; padding: 15px; border-radius: 5px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>WhatsApp Bot Pairing</h1>
+        <p>Enter your WhatsApp number to connect:</p>
+        
+        <input type="text" id="phoneNumber" placeholder="+94123456789">
+        <button onclick="startPairing()">Generate Pairing Code</button>
+        
+        <div id="pairingSection" style="display: none;">
+            <h2>Your Pairing Code:</h2>
+            <div id="codeDisplay"></div>
+            
+            <button onclick="copyCode()">Copy Code</button>
+            
+            <div class="instructions">
+                <h3>How to pair:</h3>
+                <ol>
+                    <li>Open WhatsApp on your phone</li>
+                    <li>Go to Settings → Linked Devices → Link a Device</li>
+                    <li>Select "Link with phone number"</li>
+                    <li>Enter the pairing code shown above</li>
+                </ol>
+            </div>
+            
+            <p>Status: <span id="status">Waiting for connection...</span></p>
+        </div>
+    </div>
+
+    <script>
+        let currentPhoneNumber = '';
+        let checkInterval = null;
+
+        function startPairing() {
+            const phoneNumber = document.getElementById('phoneNumber').value.trim();
+            if (!phoneNumber) {
+                alert('Please enter your WhatsApp number');
+                return;
+            }
+
+            currentPhoneNumber = phoneNumber;
+            
+            fetch('/start-session', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ phoneNumber }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    document.getElementById('codeDisplay').textContent = data.pairingCode;
+                    document.getElementById('pairingSection').style.display = 'block';
+                    
+                    // Start checking connection status
+                    checkInterval = setInterval(checkConnectionStatus, 3000);
+                } else {
+                    alert('Error: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to start pairing');
+            });
+        }
+
+        function copyCode() {
+            const code = document.getElementById('codeDisplay').textContent;
+            navigator.clipboard.writeText(code)
+                .then(() => alert('Code copied to clipboard!'))
+                .catch(err => console.error('Failed to copy:', err));
+        }
+
+        function checkConnectionStatus() {
+            fetch(`/check-status/${currentPhoneNumber}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'connected') {
+                        document.getElementById('status').textContent = 'Connected successfully!';
+                        document.getElementById('status').style.color = 'green';
+                        clearInterval(checkInterval);
+                    } else if (data.status === 'pending') {
+                        document.getElementById('status').textContent = 'Waiting for connection...';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking status:', error);
+                });
+        }
+    </script>
+</body>
+</html>
