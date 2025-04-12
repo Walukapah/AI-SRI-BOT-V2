@@ -1,0 +1,36 @@
+{
+  "name": "whatsapp-bot",
+  "version": "1.0.0",
+  "description": "WhatsApp Bot using Baileys library with pairing code system",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "whatsapp",
+    "bot",
+    "baileys",
+    "automation"
+  ],
+  "author": "Your Name",
+  "license": "ISC",
+  "dependencies": {
+    "@adiwajshing/baileys": "^6.4.0",
+    "@adiwajshing/baileys-store": "^1.0.3",
+    "express": "^4.18.2",
+    "body-parser": "^1.20.2",
+    "qrcode-terminal": "^0.12.0",
+    "fs-extra": "^11.1.1",
+    "dotenv": "^16.3.1",
+    "pm2": "^5.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=16.x",
+    "npm": ">=8.x"
+  }
+}
